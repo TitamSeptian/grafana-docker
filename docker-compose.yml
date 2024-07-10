@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  grafana:
+    image: grafana/grafana-enterprise:11.1.0
+    container_name: grafana
+    restart: always
+    ports:
+      - 3005:3000
+    user: '104'
+    networks:
+      - grafana_network
+    depends_on:
+      - influxdb
+  influxdb:
+    image: influxdb:1.8.5
+    container_name: influxdb_local
+    restart: always
+    ports:
+      - 8087:8086
+    networks:
+      - grafana_network
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    environment:
+      - INFLUXDB_USER=influxdb
+      - INFLUXDB_USER_PASSWORD=123qwe123
+
+  prometheus:
+    image: prom/prometheus:v2.45.5
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus # Assuming you have a prometheus.yml config file in ./prometheus directory
+      - prometheus_data:/prometheus
+    networks:
+      - grafana_network
+networks:
+  grafana_network:
+volumes:
+  grafana_data:
+  influxdb_data:
+  prometheus_data:
+
